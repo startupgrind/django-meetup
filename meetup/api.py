@@ -7,16 +7,11 @@ DATE: Mon Sep 15 00:12:21 2014
 """
 # ########################################################################### #
 
-# import modules
-
 from __future__ import print_function, division, unicode_literals
 import os
 from urllib import urlencode
 from urllib2 import urlopen
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 # ########################################################################### #
 
@@ -27,7 +22,7 @@ class MeetupClient(object):
         self.api_key = api_key
         self._cached_request_urls = {}
 
-    def signed_request_url (self,meetup_method,params=None,request_hash=None):
+    def signed_request_url(self, meetup_method, params=None, request_hash=None):
         """To GET data from api.meetup.com"""
         if request_hash is not None and request_hash in self._cached_request_urls:
             return self._cached_request_urls[request_hash]
@@ -42,7 +37,7 @@ class MeetupClient(object):
             self._cached_request_urls[request_hash] = signed_url
         return signed_url
 
-    def invoke (self, meetup_method, params=None, method='GET'):
+    def invoke(self, meetup_method, params=None, method='GET'):
         """ For invoking a request
 
         Parameters
@@ -87,7 +82,7 @@ class MeetupClient(object):
         content = unicode(content, 'utf-8', 'ignore')
         return json.load(content)
 
-    def get_events (self,id,id_type="group",**params):
+    def get_events(self, id, id_type="group", **params):
         params = params.copy()
         params.setdefault('status',"upcoming,past,pending")
         params['{}_id'.format(id_type)] = id
