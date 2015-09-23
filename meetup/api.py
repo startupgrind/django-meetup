@@ -71,23 +71,26 @@ class MeetupClient(object):
         elif method == 'POST':
             return self._post(url, params)
 
-    def _get(self, url, params):
-        url = "{}?{}".format(url, urlencode(params))
+    def _get(self, url, kwargs):
+        url = "{}?{}".format(url, urlencode(kwargs))
         content = urlopen(url).read()
         content = unicode(content, 'utf-8', 'ignore')
         return json.loads(content)
 
-    def _post(self, url, params):
-        content = urlopen(url, urlencode(params)).read()
+    def _post(self, url, kwargs):
+        content = urlopen(url, urlencode(kwargs)).read()
         content = unicode(content, 'utf-8', 'ignore')
         return json.load(content)
 
-    def get_events(self, id, id_type="group", **params):
-        params = params.copy()
-        params.setdefault('status',"upcoming,past,pending")
-        params['{}_id'.format(id_type)] = id
-        return self.invoke("2/events",params)
+    def get_events(self, id, id_type="group", **kwargs):
+        kwargs = kwargs.copy()
+        kwargs.setdefault('status',"upcoming,past,pending")
+        kwargs['{}_id'.format(id_type)] = id
+        return self.invoke("2/events",kwargs)
 
-    def update_event(self, event_id, **params):
-        return self.invoke('event/{}'.format(event_id), params, method='POST')
+    def create_event(self, **kwargs):
+        return self.invoke('event/', kwargs, method='POST')
+
+    def update_event(self, event_id, **kwargs):
+        return self.invoke('event/{}'.format(event_id), kwargs, method='POST')
 
