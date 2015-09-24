@@ -82,10 +82,9 @@ class MeetupClient(object):
         content = unicode(content, 'utf-8', 'ignore')
         return json.load(content)
 
-    def get_events(self, id, id_type="group", **kwargs):
+    def get_events(self, id_type="group", **kwargs):
         kwargs = kwargs.copy()
         kwargs.setdefault('status',"upcoming,past,pending")
-        kwargs['{}_id'.format(id_type)] = id
         return self.invoke("2/events",kwargs)
 
     def create_event(self, **kwargs):
