@@ -8,12 +8,11 @@ DATE: Mon Sep 15 00:12:21 2014
 # ########################################################################### #
 
 from __future__ import print_function, division, unicode_literals
+import json
 import os
 from urllib import urlencode
 from urllib2 import urlopen
-import json
 
-# ########################################################################### #
 
 class MeetupClient(object):
     """ MeetupClient """
@@ -31,7 +30,7 @@ class MeetupClient(object):
         params = params.copy() if params is not None else {}
         params['signed'] = True
 
-        response = self.invoke(meetup_method,params,method='GET')
+        response = self.invoke(meetup_method, params, method='GET')
         signed_url = response['signed_url']
         if request_hash is not None:
             self._cached_request_urls[request_hash] = signed_url
@@ -63,7 +62,7 @@ class MeetupClient(object):
         # see http://www.meetup.com/meetup_api/docs/
         if meetup_method.startswith("/"):
             meetup_method = meetup_method[1:]
-        url =  os.path.join("https://api.meetup.com",meetup_method)
+        url = os.path.join("https://api.meetup.com", meetup_method)
 
         # get response
         if method == 'GET':
@@ -84,12 +83,11 @@ class MeetupClient(object):
 
     def get_events(self, id_type="group", **kwargs):
         kwargs = kwargs.copy()
-        kwargs.setdefault('status',"upcoming,past,pending")
-        return self.invoke("2/events",kwargs)
+        kwargs.setdefault('status', "upcoming,past")
+        return self.invoke("2/events", kwargs)
 
     def create_event(self, **kwargs):
         return self.invoke('event/', kwargs, method='POST')
 
     def update_event(self, event_id, **kwargs):
         return self.invoke('event/{}'.format(event_id), kwargs, method='POST')
-
