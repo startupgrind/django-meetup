@@ -90,4 +90,15 @@ class MeetupClient(object):
         return self.invoke('2/event/', kwargs, method='POST')
 
     def update_event(self, event_id, **kwargs):
-        return self.invoke('2/event/{}'.format(event_id), kwargs, method='POST')
+        return self.invoke(
+            '2/event/{}'.format(event_id),
+            kwargs,
+            method='POST'
+        )
+
+    def create_venue(self, group_urlname, **kwargs):
+        return self.invoke(
+            group_urlname + "/venues",
+            kwargs,
+            method="POST"
+        )
