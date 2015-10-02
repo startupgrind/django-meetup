@@ -87,7 +87,7 @@ class MeetupClient(object):
         return self.invoke("2/events", kwargs)
 
     def create_event(self, **kwargs):
-        return self.invoke('event/', kwargs, method='POST')
+        return self.invoke('2/event/', kwargs, method='POST')
 
     def update_event(self, event_id, **kwargs):
-        return self.invoke('event/{}'.format(event_id), kwargs, method='POST')
+        return self.invoke('2/event/{}'.format(event_id), kwargs, method='POST')
