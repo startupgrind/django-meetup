@@ -13,6 +13,8 @@ import os
 from urllib import urlencode
 from urllib2 import urlopen
 
+import requests
+
 
 class MeetupClient(object):
     """ MeetupClient """
@@ -77,9 +79,8 @@ class MeetupClient(object):
         return json.loads(content)
 
     def _post(self, url, kwargs):
-        content = urlopen(url, urlencode(kwargs)).read()
-        content = unicode(content, 'utf-8', 'ignore')
-        return json.load(content)
+        content = requests.post(url, data=kwargs).text
+        return json.loads(content)
 
     def get_events(self, id_type="group", **kwargs):
         kwargs = kwargs.copy()
