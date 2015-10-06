@@ -71,6 +71,14 @@ class MeetupClient(object):
             return self._get(url, params)
         elif method == 'POST':
             return self._post(url, params)
+        elif method == 'DELETE':
+            return self._delete(url, params)
+
+    def _delete(self, url, kwargs):
+        url = "{}?{}".format(url, urlencode(kwargs))
+        content = urlopen(url).read()
+        content = unicode(content, 'utf-8', 'ignore')
+        return json.loads(content)
 
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
@@ -89,6 +97,9 @@ class MeetupClient(object):
 
     def create_event(self, **kwargs):
         return self.invoke('2/event/', kwargs, method='POST')
+
+    def delete_event(self, event_id):
+        return self.invoke('2/event/{}'.format(event_id), method='DELETE')
 
     def update_event(self, event_id, **kwargs):
         return self.invoke(
