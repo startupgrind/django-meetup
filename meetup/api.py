@@ -75,9 +75,7 @@ class MeetupClient(object):
             return self._delete(url, params)
 
     def _delete(self, url, kwargs):
-        url = "{}?{}".format(url, urlencode(kwargs))
-        content = urlopen(url).read()
-        content = unicode(content, 'utf-8', 'ignore')
+        content = requests.delete(url, data=kwargs).text
         return json.loads(content)
 
     def _get(self, url, kwargs):
