@@ -76,17 +76,26 @@ class MeetupClient(object):
 
     def _delete(self, url, kwargs):
         content = requests.delete(url, params=kwargs).text
-        return json.loads(content)
+        try:
+            return json.loads(content)
+        except:
+            return None
 
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
         content = urlopen(url).read()
         content = unicode(content, 'utf-8', 'ignore')
-        return json.loads(content)
+        try:
+            return json.loads(content)
+        except:
+            return None
 
     def _post(self, url, kwargs):
         content = requests.post(url, data=kwargs).text
-        return json.loads(content)
+        try:
+            return json.loads(content)
+        except:
+            return None
 
     def get_events(self, id_type="group", **kwargs):
         kwargs = kwargs.copy()
