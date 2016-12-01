@@ -121,3 +121,6 @@ class MeetupClient(object):
             kwargs,
             method="POST"
         )
+
+    def get_profiles(self, **kwargs):
+        return self.invoke('2/profiles/', kwargs)
