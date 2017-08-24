@@ -8,16 +8,23 @@ DATE: Mon Sep 15 00:12:21 2014
 # ########################################################################### #
 
 from __future__ import print_function, division, unicode_literals
-import json
+
 import os
+from datetime import datetime
+from datetime import timedelta
+from time import sleep
 from urllib import urlencode
-from urllib2 import urlopen
 
 import requests
 
 
 class MeetupClient(object):
     """ MeetupClient """
+
+    rate_limit_remaining = 100
+    rate_limit_reset = 1
+    last_response_time = None
+
     def __init__(self, api_key):
         """ Find your api_key from https://secure.meetup.com/meetup_api/key/"""
         self.api_key = api_key
@@ -66,6 +73,7 @@ class MeetupClient(object):
             meetup_method = meetup_method[1:]
         url = os.path.join("https://api.meetup.com", meetup_method)
 
+        self._wait_on_rate_limit_reached()
         # get response
         if method == 'GET':
             return self._get(url, params)
@@ -74,26 +82,66 @@ class MeetupClient(object):
         elif method == 'DELETE':
             return self._delete(url, params)
 
-    def _delete(self, url, kwargs):
-        content = requests.delete(url, params=kwargs).text
+    def _wait_on_rate_limit_reached(self):
+        """Waits for the end of the rate limit time window.
+        """
+        if self.rate_limit_remaining > 0:
+            return
+        if not self.last_response_time:
+            return
+        reset_delta = timedelta(seconds=self.rate_limit_reset)
+        end_of_window = self.last_response_time + reset_delta
+        if end_of_window < datetime.now():
+            return
+        wait_delta = (end_of_window - datetime.now())
+        wait_seconds = (86400 * wait_delta.days) + wait_delta.seconds
+        if wait_delta.microseconds:
+            wait_seconds += 1
+        sleep(wait_seconds)
+
+    def _capture_rate_limit(self, response):
+        """Captures Meetup response rate limit information.
+
+        Enables future calls to avoid failed requests due to rate limiting.
+        Should be called immediately after every response from the API.
+
+        Args:
+            response (HTTPResponse): response from the last request
+        """
+        self.last_response_time = datetime.now()
+        headers = response.headers
         try:
-            return json.loads(content)
+            headers['X-RateLimit-Limit']
+            headers['X-RateLimit-Remaining']
+            headers['X-RateLimit-Reset']
+        except:
+            return
+        self.rate_limit_remaining = int(headers['X-RateLimit-Remaining'])
+        self.rate_limit_reset = int(headers['X-RateLimit-Reset'])
+        pass
+
+    def _delete(self, url, kwargs):
+        response = requests.delete(url, params=kwargs).text
+        try:
+            self._capture_rate_limit(response)
+            return response.json()
         except:
             return None
 
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
-        content = urlopen(url).read()
-        content = unicode(content, 'utf-8', 'ignore')
+        response = requests.get(url)
         try:
-            return json.loads(content)
+            self._capture_rate_limit(response)
+            return response.json()
         except:
             return None
 
     def _post(self, url, kwargs):
-        content = requests.post(url, data=kwargs).text
+        response = requests.post(url, data=kwargs).text
         try:
-            return json.loads(content)
+            self._capture_rate_limit(response)
+            return response.json()
         except:
             return None
 
