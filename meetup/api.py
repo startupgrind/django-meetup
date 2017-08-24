@@ -110,13 +110,10 @@ class MeetupClient(object):
         self.last_response_time = datetime.now()
         headers = response.headers
         try:
-            headers['X-RateLimit-Limit']
-            headers['X-RateLimit-Remaining']
-            headers['X-RateLimit-Reset']
+            self.rate_limit_remaining = int(headers['X-RateLimit-Remaining'])
+            self.rate_limit_reset = int(headers['X-RateLimit-Reset'])
         except KeyError:
-            return
-        self.rate_limit_remaining = int(headers['X-RateLimit-Remaining'])
-        self.rate_limit_reset = int(headers['X-RateLimit-Reset'])
+            pass
 
     def _delete(self, url, kwargs):
         response = requests.delete(url, params=kwargs).text
