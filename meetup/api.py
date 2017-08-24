@@ -96,7 +96,12 @@ class MeetupClient(object):
             return None
         url = page['meta']['next']
         self._wait_on_rate_limit_reached()
-        return self._get(url, {})
+        response = requests.get(url)
+        try:
+            self._capture_rate_limit(response)
+            return response.json()
+        except:
+            return None
 
     def _wait_on_rate_limit_reached(self):
         """Waits for the end of the rate limit time window.
