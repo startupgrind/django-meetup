@@ -113,7 +113,7 @@ class MeetupClient(object):
             headers['X-RateLimit-Limit']
             headers['X-RateLimit-Remaining']
             headers['X-RateLimit-Reset']
-        except:
+        except KeyError:
             return
         self.rate_limit_remaining = int(headers['X-RateLimit-Remaining'])
         self.rate_limit_reset = int(headers['X-RateLimit-Reset'])
