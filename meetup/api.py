@@ -57,7 +57,6 @@ class MeetupClient(object):
 
         Returns
         response : dict
-
         """
         # TODO: rename invoke to http_response
 
@@ -80,6 +79,23 @@ class MeetupClient(object):
             return self._post(url, params)
         elif method == 'DELETE':
             return self._delete(url, params)
+
+    def get_next_page(self, page):
+        """Returns the next page for previous page result.
+
+        Args:
+            page (dict): page result from prior invoke call
+
+        Returns:
+            None if no next page, or fetched next page
+        """
+        if not page.has_key('meta'):
+            return None
+        if not page['meta'].has_key('next'):
+            return None
+        url = page['meta']['next']
+        self._wait_on_rate_limit_reached()
+        return self._get(url, {})
 
     def _wait_on_rate_limit_reached(self):
         """Waits for the end of the rate limit time window.
