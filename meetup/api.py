@@ -10,12 +10,11 @@ DATE: Mon Sep 15 00:12:21 2014
 from __future__ import print_function, division, unicode_literals
 
 import os
+import requests
 from datetime import datetime
 from datetime import timedelta
 from time import sleep
 from urllib import urlencode
-
-import requests
 
 
 class MeetupClient(object):
@@ -118,7 +117,6 @@ class MeetupClient(object):
             return
         self.rate_limit_remaining = int(headers['X-RateLimit-Remaining'])
         self.rate_limit_reset = int(headers['X-RateLimit-Reset'])
-        pass
 
     def _delete(self, url, kwargs):
         response = requests.delete(url, params=kwargs).text
