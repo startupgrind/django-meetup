@@ -10,7 +10,6 @@ DATE: Mon Sep 15 00:54:16 2014
 # import modules 
 
 from __future__ import print_function, division, unicode_literals
-import os 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from meetup.sync import sync_group_events

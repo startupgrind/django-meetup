@@ -138,7 +138,7 @@ class MeetupClient(object):
             pass
 
     def _delete(self, url, kwargs):
-        response = requests.delete(url, params=kwargs).text
+        response = requests.delete(url, params=kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
@@ -155,7 +155,7 @@ class MeetupClient(object):
             return None
 
     def _post(self, url, kwargs):
-        response = requests.post(url, data=kwargs).text
+        response = requests.post(url, data=kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
