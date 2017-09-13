@@ -13,7 +13,7 @@ import os
 import requests
 from datetime import datetime
 from datetime import timedelta
-from time import sleep
+import time
 from urllib import urlencode
 
 
@@ -118,7 +118,7 @@ class MeetupClient(object):
         wait_seconds = (86400 * wait_delta.days) + wait_delta.seconds
         if wait_delta.microseconds:
             wait_seconds += 1
-        sleep(wait_seconds)
+        time.sleep(wait_seconds)
 
     def _capture_rate_limit(self, response):
         """Captures Meetup response rate limit information.
