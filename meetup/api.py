@@ -63,7 +63,7 @@ class MeetupClient(object):
         # get the parameters
         params = params.copy() if params is not None else {}
         params['key'] = self.api_key
-        if not params.has_key('page'):
+        if 'page' not in params:
             params['page'] = 1000
 
         # the specific meetup method
