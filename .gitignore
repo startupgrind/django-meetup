@@ -37,9 +37,11 @@ nosetests.xml
 *.mo
 
 ### Developer Applications
+.idea
 .mr.developer.cfg
 .project
 .pydevproject
+.python-version
 .settings
 *.swp
 *.sublime*

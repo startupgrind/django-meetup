@@ -8,16 +8,22 @@ DATE: Mon Sep 15 00:12:21 2014
 # ########################################################################### #
 
 from __future__ import print_function, division, unicode_literals
-import json
-import os
-from urllib import urlencode
-from urllib2 import urlopen
 
+import os
 import requests
+from datetime import datetime
+from datetime import timedelta
+import time
+from urllib import urlencode
 
 
 class MeetupClient(object):
     """ MeetupClient """
+
+    rate_limit_remaining = 100
+    rate_limit_reset = 1
+    last_response_time = None
+
     def __init__(self, api_key):
         """ Find your api_key from https://secure.meetup.com/meetup_api/key/"""
         self.api_key = api_key
@@ -51,14 +57,14 @@ class MeetupClient(object):
 
         Returns
         response : dict
-
         """
         # TODO: rename invoke to http_response
 
         # get the parameters
         params = params.copy() if params is not None else {}
         params['key'] = self.api_key
-        params['page'] = 1000
+        if 'page' not in params:
+            params['page'] = 1000
 
         # the specific meetup method
         # see http://www.meetup.com/meetup_api/docs/
@@ -66,6 +72,7 @@ class MeetupClient(object):
             meetup_method = meetup_method[1:]
         url = os.path.join("https://api.meetup.com", meetup_method)
 
+        self._wait_on_rate_limit_reached()
         # get response
         if method == 'GET':
             return self._get(url, params)
@@ -74,26 +81,84 @@ class MeetupClient(object):
         elif method == 'DELETE':
             return self._delete(url, params)
 
-    def _delete(self, url, kwargs):
-        content = requests.delete(url, params=kwargs).text
+    def get_next_page(self, page):
+        """Returns the next page for previous page result.
+
+        Args:
+            page (dict): page result from prior invoke call
+
+        Returns:
+            None if no next page, or fetched next page
+        """
+        if not page.has_key('meta'):
+            return None
+        if not page['meta'].has_key('next'):
+            return None
+        url = page['meta']['next']
+        self._wait_on_rate_limit_reached()
+        response = requests.get(url)
         try:
-            return json.loads(content)
+            self._capture_rate_limit(response)
+            return response.json()
+        except:
+            return None
+
+    def _wait_on_rate_limit_reached(self):
+        """Waits for the end of the rate limit time window.
+        """
+        if self.rate_limit_remaining > 0:
+            return
+        if not self.last_response_time:
+            return
+        reset_delta = timedelta(seconds=self.rate_limit_reset)
+        end_of_window = self.last_response_time + reset_delta
+        if end_of_window < datetime.now():
+            return
+        wait_delta = (end_of_window - datetime.now())
+        wait_seconds = (86400 * wait_delta.days) + wait_delta.seconds
+        if wait_delta.microseconds:
+            wait_seconds += 1
+        time.sleep(wait_seconds)
+
+    def _capture_rate_limit(self, response):
+        """Captures Meetup response rate limit information.
+
+        Enables future calls to avoid failed requests due to rate limiting.
+        Should be called immediately after every response from the API.
+
+        Args:
+            response (HTTPResponse): response from the last request
+        """
+        self.last_response_time = datetime.now()
+        headers = response.headers
+        try:
+            self.rate_limit_remaining = int(headers['X-RateLimit-Remaining'])
+            self.rate_limit_reset = int(headers['X-RateLimit-Reset'])
+        except KeyError:
+            pass
+
+    def _delete(self, url, kwargs):
+        response = requests.delete(url, params=kwargs)
+        try:
+            self._capture_rate_limit(response)
+            return response.json()
         except:
             return None
 
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
-        content = urlopen(url).read()
-        content = unicode(content, 'utf-8', 'ignore')
+        response = requests.get(url)
         try:
-            return json.loads(content)
+            self._capture_rate_limit(response)
+            return response.json()
         except:
             return None
 
     def _post(self, url, kwargs):
-        content = requests.post(url, data=kwargs).text
+        response = requests.post(url, data=kwargs)
         try:
-            return json.loads(content)
+            self._capture_rate_limit(response)
+            return response.json()
         except:
             return None
 

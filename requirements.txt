@@ -1,5 +1,7 @@
 Django>=1.7
 django-extensions>=1.2.5
+mock==1.0.1
 python-dateutil>=2.1
 pytz>=2014.7
+requests>=2.10.0
 simplejson>=3.3.2
