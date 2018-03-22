@@ -180,6 +180,18 @@ class MeetupClient(object):
             method='POST'
         )
 
+    def close_event_rsvps(self, group_urlname, event_id):
+        return self.invoke(
+            '%s/events/%s/rsvps/close/' % (group_urlname, event_id),
+            method='POST'
+        )
+
+    def open_event_rsvps(self, group_urlname, event_id):
+        return self.invoke(
+            '%s/events/%s/rsvps/open/' % (group_urlname, event_id),
+            method='POST'
+        )
+
     def create_venue(self, group_urlname, **kwargs):
         return self.invoke(
             group_urlname + "/venues",
