@@ -151,8 +151,27 @@ class MeetupClientTests(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class MeetupAPIEndpointsTests(MeetupClientTests):
+    """Test cases for individual API endpoints.
+    """
+
+    @patch.object(MeetupClient, "invoke")
+    def test_close_event_rsvps(self, mocked_invoke):
+        self.client.close_event_rsvps("test-group", 2600)
+        mocked_invoke.assert_called_with(
+            'test-group/events/2600/rsvps/close/',
+            method='POST'
+        )
+
+    @patch.object(MeetupClient, "invoke")
+    def test_open_event_rsvps(self, mocked_invoke):
+        self.client.open_event_rsvps("test-group", 2600)
+        mocked_invoke.assert_called_with(
+            'test-group/events/2600/rsvps/open/',
+            method='POST'
+        )
+
 
 # ########################################################################### #
 if __name__ == "__main__":
     unittest.main()
-    
