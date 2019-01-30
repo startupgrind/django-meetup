@@ -24,9 +24,12 @@ class MeetupClient(object):
     rate_limit_reset = 1
     last_response_time = None
 
-    def __init__(self, api_key):
+    def __init__(self, api_key=None, oauth_token=None):
         """ Find your api_key from https://secure.meetup.com/meetup_api/key/"""
         self.api_key = api_key
+        self.requests_kwargs = {
+            'headers': {'Authorization': 'Bearer %s' % oauth_token}
+        } if oauth_token else {}
         self._cached_request_urls = {}
 
     def signed_request_url(self, meetup_method, params=None, request_hash=None):
@@ -62,7 +65,8 @@ class MeetupClient(object):
 
         # get the parameters
         params = params.copy() if params is not None else {}
-        params['key'] = self.api_key
+        if self.api_key:
+            params['key'] = self.api_key
         if 'page' not in params:
             params['page'] = 1000
 
@@ -96,7 +100,7 @@ class MeetupClient(object):
             return None
         url = page['meta']['next']
         self._wait_on_rate_limit_reached()
-        response = requests.get(url)
+        response = requests.get(url, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
@@ -138,7 +142,11 @@ class MeetupClient(object):
             pass
 
     def _delete(self, url, kwargs):
-        response = requests.delete(url, params=kwargs)
+        response = requests.delete(
+            url,
+            params=kwargs,
+            **self.requests_kwargs
+        )
         try:
             self._capture_rate_limit(response)
             return response.json()
@@ -147,7 +155,7 @@ class MeetupClient(object):
 
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
-        response = requests.get(url)
+        response = requests.get(url, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
@@ -155,7 +163,7 @@ class MeetupClient(object):
             return None
 
     def _post(self, url, kwargs):
-        response = requests.post(url, data=kwargs)
+        response = requests.post(url, data=kwargs, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()

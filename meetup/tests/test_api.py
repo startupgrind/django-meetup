@@ -7,7 +7,7 @@ DATE: Mon Sep 15 00:52:58 2014
 """
 # ########################################################################### #
 
-# import modules 
+# import modules
 
 from __future__ import print_function, division, unicode_literals
 import time
@@ -42,6 +42,54 @@ class MeetupClientTests(unittest.TestCase):
         self.mock_response = Mock(
             headers=self.response_headers,
             json=self.mock_json
+        )
+
+    @patch.object(requests, "get")
+    @patch.object(requests, "post")
+    @patch.object(requests, "delete")
+    def test_oauth_requests(self, mock_delete, mock_post, mock_get):
+        mock_get.return_value = self.mock_response
+        self.client = MeetupClient(oauth_token=MEETUP_KEY)
+        self.client.invoke(
+            meetup_method="2/groups",
+            params={"member_id": "12345"},
+            method="GET"
+        )
+        mock_get.assert_called_once_with(
+            "https://api.meetup.com/2/groups"
+            "?page=1000"
+            "&member_id=12345",
+            headers={'Authorization': 'Bearer abc123'}
+        )
+
+        mock_post.return_value = self.mock_response
+        self.client.invoke(
+            meetup_method="2/groups",
+            params={"name": "Awesome Team"},
+            method="POST"
+        )
+        mock_post.assert_called_once_with(
+            "https://api.meetup.com/2/groups",
+            data={
+                "page": 1000,
+                "name": "Awesome Team"
+            },
+            headers={'Authorization': 'Bearer abc123'}
+        )
+
+        mock_delete.return_value = self.mock_response
+        self.client.invoke(
+            meetup_method="2/groups/awesome-team",
+            params={"id": 72},
+            method="DELETE"
+        )
+        mock_delete.assert_called_once_with(
+            "https://api.meetup.com/2/groups/awesome-team",
+            params={
+                "page": 1000,
+                "id": 72
+            },
+            headers={'Authorization': 'Bearer abc123'}
         )
 
     @patch.object(requests, "get")
