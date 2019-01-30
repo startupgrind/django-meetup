@@ -27,8 +27,8 @@ class MeetupClient(object):
     def __init__(self, api_key=None, oauth_token=None):
         """ Find your api_key from https://secure.meetup.com/meetup_api/key/"""
         self.api_key = api_key
-        self.request_headers = {
-            'Authorization': 'Bearer %s' % oauth_token
+        self.requests_kwargs = {
+            'headers': {'Authorization': 'Bearer %s' % oauth_token}
         } if oauth_token else {}
         self._cached_request_urls = {}
 
@@ -100,7 +100,7 @@ class MeetupClient(object):
             return None
         url = page['meta']['next']
         self._wait_on_rate_limit_reached()
-        response = requests.get(url, headers=self.request_headers)
+        response = requests.get(url, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
@@ -145,7 +145,7 @@ class MeetupClient(object):
         response = requests.delete(
             url,
             params=kwargs,
-            headers=self.request_headers
+            **self.requests_kwargs
         )
         try:
             self._capture_rate_limit(response)
@@ -155,7 +155,7 @@ class MeetupClient(object):
 
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
-        response = requests.get(url, headers=self.request_headers)
+        response = requests.get(url, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
@@ -163,7 +163,7 @@ class MeetupClient(object):
             return None
 
     def _post(self, url, kwargs):
-        response = requests.post(url, data=kwargs, headers=self.request_headers)
+        response = requests.post(url, data=kwargs, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
