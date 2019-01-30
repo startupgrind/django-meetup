@@ -24,13 +24,12 @@ class MeetupClient(object):
     rate_limit_reset = 1
     last_response_time = None
 
-    request_headers = {}
-
     def __init__(self, api_key=None, oauth_token=None):
         """ Find your api_key from https://secure.meetup.com/meetup_api/key/"""
         self.api_key = api_key
-        if oauth_token:
-            self.request_headers['Authorization'] = 'Bearer %s' % oauth_token
+        self.request_headers = {
+            'Authorization': 'Bearer %s' % oauth_token
+        } if oauth_token else {}
         self._cached_request_urls = {}
 
     def signed_request_url(self, meetup_method, params=None, request_hash=None):
