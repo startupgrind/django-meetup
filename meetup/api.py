@@ -110,8 +110,7 @@ class MeetupClient(object):
             return None
 
     def _wait_on_rate_limit_reached(self):
-        """Waits for the end of the rate limit time window.
-        """
+        """Waits for the end of the rate limit time window."""
         if self.rate_limit_remaining > 0:
             return
         if not self.last_response_time:
