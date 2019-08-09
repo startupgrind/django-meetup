@@ -21,6 +21,8 @@ jobs:
           command: |
             pwd
             ls -al
+            python --version
+            pip freeze
       - run:
           name: Run api unit tests
           command: python -m unittest meetup.tests.test_api
