@@ -82,6 +82,8 @@ class MeetupClient(object):
             return self._get(url, params)
         elif method == 'POST':
             return self._post(url, params)
+        elif method == 'PATCH':
+            return self._patch(url, params)
         elif method == 'DELETE':
             return self._delete(url, params)
 
@@ -156,6 +158,14 @@ class MeetupClient(object):
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
         response = requests.get(url, **self.requests_kwargs)
+        try:
+            self._capture_rate_limit(response)
+            return response.json()
+        except:
+            return None
+
+    def _patch(self, url, kwargs):
+        response = requests.patch(url, data=kwargs, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()
