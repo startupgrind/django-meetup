@@ -17,15 +17,10 @@ jobs:
             source ~/venv/bin/activate
             pip install -r requirements.txt
       - run:
-          name: Where am I?
-          command: |
-            pwd
-            ls -al
-            python --version
-            pip freeze
-      - run:
           name: Run api unit tests
-          command: python -m unittest meetup.tests.test_api
+          command: |
+            source ~/venv/bin/activate
+            python -m unittest meetup.tests.test_api
 
 workflows:
   version: 2
