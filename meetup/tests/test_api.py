@@ -71,7 +71,6 @@ class MeetupClientTests(unittest.TestCase):
         mock_post.assert_called_once_with(
             "https://api.meetup.com/2/groups",
             data={
-                "page": 1000,
                 "name": "Awesome Team"
             },
             headers={'Authorization': 'Bearer abc123'}
@@ -86,7 +85,6 @@ class MeetupClientTests(unittest.TestCase):
         mock_delete.assert_called_once_with(
             "https://api.meetup.com/2/groups/awesome-team",
             params={
-                "page": 1000,
                 "id": 72
             },
             headers={'Authorization': 'Bearer abc123'}
@@ -111,6 +109,26 @@ class MeetupClientTests(unittest.TestCase):
         self.mock_json.assert_called_once_with()
         self.assertIs(self.json_body, result)
 
+    @patch.object(requests, "patch")
+    def test_invoke_patch_calls_requests(self, mock_patch):
+        mock_patch.return_value = self.mock_response
+        result = self.client.invoke(
+            meetup_method="foo/events/1734824",
+            params={
+                "name": "Awesome Team Event"
+            },
+            method="PATCH"
+        )
+        mock_patch.assert_called_once_with(
+            "https://api.meetup.com/foo/events/1734824",
+            data={
+                "key": "abc123",
+                "name": "Awesome Team Event"
+            }
+        )
+        self.mock_json.assert_called_once_with()
+        self.assertIs(self.json_body, result)
+
     @patch.object(requests, "post")
     def test_invoke_post_calls_requests(self, mock_post):
         mock_post.return_value = self.mock_response
@@ -125,7 +143,6 @@ class MeetupClientTests(unittest.TestCase):
             "https://api.meetup.com/2/groups",
             data={
                 "key": "abc123",
-                "page": 1000,
                 "name": "Awesome Team"
             }
         )
@@ -146,7 +163,6 @@ class MeetupClientTests(unittest.TestCase):
             "https://api.meetup.com/2/groups/awesome-team",
             params={
                 "key": "abc123",
-                "page": 1000,
                 "id": 72
             }
         )

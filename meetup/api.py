@@ -67,8 +67,6 @@ class MeetupClient(object):
         params = params.copy() if params is not None else {}
         if self.api_key:
             params['key'] = self.api_key
-        if 'page' not in params:
-            params['page'] = 1000
 
         # the specific meetup method
         # see http://www.meetup.com/meetup_api/docs/
@@ -79,6 +77,8 @@ class MeetupClient(object):
         self._wait_on_rate_limit_reached()
         # get response
         if method == 'GET':
+            if 'page' not in params:
+                params['page'] = 1000
             return self._get(url, params)
         elif method == 'POST':
             return self._post(url, params)
