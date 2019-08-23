@@ -45,6 +45,19 @@ class MeetupClientTests(unittest.TestCase):
             json=self.mock_json
         )
 
+    def assertGetCallMatches(self, called_url, expected_path, params_dict):
+        parsed_url = urlparse(called_url)
+        query_dict = parse_qs(parsed_url.query)
+
+        self.assertEqual(parsed_url.scheme, 'https')
+        self.assertEqual(parsed_url.netloc, 'api.meetup.com')
+        self.assertEqual(parsed_url.path, expected_path)
+
+        self.assertDictEqual(
+            params_dict,
+            query_dict
+        )
+
     @patch.object(requests, "get")
     @patch.object(requests, "post")
     @patch.object(requests, "delete")
@@ -56,11 +69,19 @@ class MeetupClientTests(unittest.TestCase):
             params={"member_id": "12345"},
             method="GET"
         )
-        mock_get.assert_called_once_with(
-            "https://api.meetup.com/2/groups"
-            "?page=1000"
-            "&member_id=12345",
-            headers={'Authorization': 'Bearer abc123'}
+
+        mock_get.assert_called_once()
+        called_url = mock_get.call_args[0][0]
+        headers = mock_get.call_args[1]['headers']
+        self.assertEqual({'Authorization': 'Bearer abc123'}, headers)
+
+        self.assertGetCallMatches(
+            called_url,
+            '/2/groups',
+            {
+                'page': ['1000'],
+                'member_id': ['12345']
+            }
         )
 
         mock_post.return_value = self.mock_response
@@ -103,20 +124,15 @@ class MeetupClientTests(unittest.TestCase):
         )
         mock_get.assert_called_once()
         called_url = mock_get.call_args[0][0]
-        parsed_url = urlparse(called_url)
-        query_dict = parse_qs(parsed_url.query)
 
-        self.assertEqual(parsed_url.scheme, 'https')
-        self.assertEqual(parsed_url.netloc, 'api.meetup.com')
-        self.assertEqual(parsed_url.path, '/2/groups')
-
-        self.assertDictEqual(
+        self.assertGetCallMatches(
+            called_url,
+            '/2/groups',
             {
                 'page': ['1000'],
                 'key': ['abc123'],
                 'member_id': ['12345'],
             },
-            query_dict
         )
 
         self.mock_json.assert_called_once_with()
