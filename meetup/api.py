@@ -14,7 +14,7 @@ import requests
 from datetime import datetime
 from datetime import timedelta
 import time
-from urllib import urlencode
+from six.moves.urllib.parse import urlencode
 
 
 class MeetupClient(object):
