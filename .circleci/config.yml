@@ -50,6 +50,7 @@ jobs:
           PYENV_ROOT: "/root/pyenv"
     working_directory: /tmp/app
     steps:
+        - checkout
         - restore_cache:
             keys:
                 - v1-project-{{ arch }}-{{ checksum "tox.ini" }}
