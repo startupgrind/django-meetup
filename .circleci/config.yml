@@ -43,6 +43,12 @@ jobs:
               paths:
                   - /root/pyenv
   unit-test-api:
+    docker:
+      - image: kaikuehne/pyenv:alpine3.10
+        environment:
+          PATH: "/root/pyenv/bin:/root/pyenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+          PYENV_ROOT: "/root/pyenv"
+    working_directory: /tmp/app
     steps:
         - restore_cache:
             keys:
