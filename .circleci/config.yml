@@ -55,6 +55,9 @@ jobs:
             keys:
                 - v1-project-{{ arch }}-{{ checksum "tox.ini" }}
         - run:
+            name: setup-local-versions
+            command: pyenv local  2.7.16 3.7.4
+        - run:
             command: tox
 
 
