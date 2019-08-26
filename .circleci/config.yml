@@ -63,6 +63,6 @@ workflows:
   build-and-tests:
     jobs:
       - install-python-and-tox
-      - unit-test-api
+      - unit-test-api:
           requires:
               - install-python-and-tox
