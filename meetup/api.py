@@ -14,7 +14,7 @@ import requests
 from datetime import datetime
 from datetime import timedelta
 import time
-from urllib import urlencode
+from six.moves.urllib.parse import urlencode
 
 
 class MeetupClient(object):
@@ -96,11 +96,10 @@ class MeetupClient(object):
         Returns:
             None if no next page, or fetched next page
         """
-        if not page.has_key('meta'):
+        meta = page.get('meta', {})
+        url = meta.get('next')
+        if url is None:
             return None
-        if not page['meta'].has_key('next'):
-            return None
-        url = page['meta']['next']
         self._wait_on_rate_limit_reached()
         response = requests.get(url, **self.requests_kwargs)
         try:

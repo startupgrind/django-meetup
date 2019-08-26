@@ -1,29 +1,71 @@
 version: 2.1
-
 jobs:
+  install-python-and-tox:
+    docker:
+        - image: kaikuehne/pyenv:alpine3.10
+          environment:
+            PATH: "/root/pyenv/bin:/root/pyenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+            PYENV_ROOT: "/root/pyenv"
+    working_directory: /tmp/app
+    steps:
+        - checkout
+        - setup_remote_docker
+        - restore_cache:
+            keys:
+                - v1-project-{{ arch }}-{{ checksum "tox.ini" }}
+                - v1-project-
+        - run:
+            name: list-python-versions
+            command: |
+                pyenv --version
+                pyenv install --list
+        - run:
+            name: install-python-27
+            command: pyenv install --keep --skip-existing 2.7.16
+        - run:
+            name: install-python-37
+            command: pyenv install --keep --skip-existing 3.7.4
+        - run:
+            name: validate-versions
+            command: |
+                pyenv rehash
+                pyenv versions
+        - run:
+            name: setup-local-versions
+            command: pyenv local  2.7.16 3.7.4
+        - run:
+            name: install-tox
+            command: |
+                pip install --upgrade pip
+                pip install tox tox-pyenv
+        - save_cache:
+              key: v1-project-{{ arch }}-{{ checksum "tox.ini" }}
+              paths:
+                  - /root/pyenv
   unit-test-api:
     docker:
-      - image: circleci/python:2.7
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASSWORD
+      - image: kaikuehne/pyenv:alpine3.10
+        environment:
+          PATH: "/root/pyenv/bin:/root/pyenv/shims:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+          PYENV_ROOT: "/root/pyenv"
+    working_directory: /tmp/app
     steps:
-      - checkout
-      - run:
-          name: Install Python requirements
-          command: |
-            pip install virtualenv
-            virtualenv ~/venv
-            source ~/venv/bin/activate
-            pip install -r requirements.txt
-      - run:
-          name: Run api unit tests
-          command: |
-            source ~/venv/bin/activate
-            python -m unittest meetup.tests.test_api
+        - checkout
+        - restore_cache:
+            keys:
+                - v1-project-{{ arch }}-{{ checksum "tox.ini" }}
+        - run:
+            name: setup-local-versions
+            command: pyenv local  2.7.16 3.7.4
+        - run:
+            command: tox
+
 
 workflows:
   version: 2
   build-and-tests:
     jobs:
-      - unit-test-api
+      - install-python-and-tox
+      - unit-test-api:
+          requires:
+              - install-python-and-tox
