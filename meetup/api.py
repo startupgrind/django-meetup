@@ -67,8 +67,6 @@ class MeetupClient(object):
         params = params.copy() if params is not None else {}
         if self.api_key:
             params['key'] = self.api_key
-        if 'page' not in params:
-            params['page'] = 1000
 
         # the specific meetup method
         # see http://www.meetup.com/meetup_api/docs/
@@ -79,9 +77,13 @@ class MeetupClient(object):
         self._wait_on_rate_limit_reached()
         # get response
         if method == 'GET':
+            if 'page' not in params:
+                params['page'] = 1000
             return self._get(url, params)
         elif method == 'POST':
             return self._post(url, params)
+        elif method == 'PATCH':
+            return self._patch(url, params)
         elif method == 'DELETE':
             return self._delete(url, params)
 
@@ -108,8 +110,7 @@ class MeetupClient(object):
             return None
 
     def _wait_on_rate_limit_reached(self):
-        """Waits for the end of the rate limit time window.
-        """
+        """Waits for the end of the rate limit time window."""
         if self.rate_limit_remaining > 0:
             return
         if not self.last_response_time:
@@ -156,6 +157,14 @@ class MeetupClient(object):
     def _get(self, url, kwargs):
         url = "{}?{}".format(url, urlencode(kwargs))
         response = requests.get(url, **self.requests_kwargs)
+        try:
+            self._capture_rate_limit(response)
+            return response.json()
+        except:
+            return None
+
+    def _patch(self, url, kwargs):
+        response = requests.patch(url, data=kwargs, **self.requests_kwargs)
         try:
             self._capture_rate_limit(response)
             return response.json()

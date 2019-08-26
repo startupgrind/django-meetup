@@ -1,0 +1,29 @@
+version: 2.1
+
+jobs:
+  unit-test-api:
+    docker:
+      - image: circleci/python:2.7
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - run:
+          name: Install Python requirements
+          command: |
+            pip install virtualenv
+            virtualenv ~/venv
+            source ~/venv/bin/activate
+            pip install -r requirements.txt
+      - run:
+          name: Run api unit tests
+          command: |
+            source ~/venv/bin/activate
+            python -m unittest meetup.tests.test_api
+
+workflows:
+  version: 2
+  build-and-tests:
+    jobs:
+      - unit-test-api
