@@ -327,7 +327,7 @@ class Event(models.Model):
 
 
     venue = models.ManyToManyField(Venue)
-    group = models.ForeignKey(Group)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     # timezone to view event times in
     _view_tz = DEFAULT_VIEW_TIMEZONE
